@@ -1,0 +1,27 @@
+{
+    "name": "clembet/omnipay-paghiper",
+    "description": "PagHiper gateway for OmniPay",
+    "keywords": [
+        "paghiper",
+	"omnipay"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Keite Clembet",
+            "email": "clembet@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+	"omnipay/common": "^3.0"
+    },
+    "require-dev": {
+        "omnipay/tests": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Omnipay\\PagHiper\\": "src/"
+        }
+    }
+}
