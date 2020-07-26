@@ -44,22 +44,22 @@ class Gateway extends AbstractGateway
 
     public function setApiKey($value)
     {
-        return $this->setParameter('api_key', $value);
+        return $this->setParameter('apiKey', $value);
     }
 
     public function getApiKey()
     {
-        return $this->getParameter('api_key');
+        return $this->getParameter('apiKey');
     }
 
     public function setApiToken($value)
     {
-        return $this->setParameter('api_token', $value);
+        return $this->setParameter('apiToken', $value);
     }
 
     public function getApiToken()
     {
-        return $this->getParameter('api_token');
+        return $this->getParameter('apiToken');
     }
 
     public function setExternalReference($value)
@@ -80,6 +80,7 @@ class Gateway extends AbstractGateway
     {
         return $this->createRequest('\Omnipay\PagHiper\Message\TokenRequest', $parameters);
     }
+
     /**
      * @param  array  $parameters
      * @return \Omnipay\PagHiper\Message\CompletePurchaseRequest

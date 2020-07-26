@@ -67,9 +67,9 @@ class PurchaseRequest extends AbstractRequest
         return $this->response = new PurchaseResponse($this, $data);
     }
 
-    protected function getEndpoint()//TODO: adaptar
+    protected function getEndpoint()
     {
-        return $this->getTestMode() ? ($this->testEndpoint . '/checkout/preferences') : ($this->liveEndpoint . '/checkout/preferences');
+        return $this->getTestMode() ? ($this->testEndpoint . '/transaction/create/') : ($this->liveEndpoint . '/transaction/create/');
     }
 
 }
