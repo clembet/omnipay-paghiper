@@ -1,16 +1,20 @@
-<?php
-
-namespace Omnipay\PagHiper\Message;
+<?php namespace Omnipay\PagHiper\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
-
 use Omnipay\Common\Message\RedirectResponseInterface;
 
 class PurchaseResponse extends AbstractResponse implements RedirectResponseInterface
 {
     public function isSuccessful()
     {
-        return false;
+        $data = $this->getData();
+        if((@$data['http_code']*1)==201)
+        {
+            $this->setTransactionReference(@$data['transaction_id']);
+            return true;
+        }
+        else
+            return false;
     }
 
     /**
@@ -38,6 +42,21 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
         if ($this->isRedirect()) {
             return $this->data->init_point;
         }
+    }
+
+    public function getBoleto()
+    {
+        $data = $this->getData();
+        $boleto = array();
+        $boleto['boleto_url'] = @$data['bank_slip']['url_slip'];
+        $boleto['boleto_url_pdf'] = @$data['bank_slip']['url_slip_pdf'];
+        $boleto['boleto_barcode'] = @$data['bank_slip']['digitable_line'];
+        $boleto['boleto_expiration_date'] = @$data['due_date'];
+        $boleto['boleto_valor'] = (@$data['value_cents']*1.0)/100.0;
+        $boleto['boleto_transaction_id'] = @$data['transaction_id'];
+        $this->setTransactionReference(@$data['transaction_id']);
+
+        return $boleto;
     }
 }
 

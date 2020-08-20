@@ -18,7 +18,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
             $items[] = array('description'=>$item->getName(),
                 'quantity'=>$item->getQuantity(),
                 'price_cents'=>(int)round(($item->getPrice()*100.0), 0),
-                'item_id' => '1');
+                'item_id' => '1');//sku
         }
 
         $data = array(
@@ -40,7 +40,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
             'discount_cents' => '0', // em centavos
             'shipping_price_cents' => $this->getShippingPrice(), // em centavos
             'shipping_methods' => 'Envio Personalizado',
-            'fixed_description' => true,
+            'fixed_description' => false,
             'type_bank_slip' => 'boletoA4', // formato do boleto
             'days_due_date' => $this->getDueDays(), // dias para vencimento do boleto
             'open_after_day_due'=>'0',
@@ -67,28 +67,9 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
         );
 
         $content = $httpRequest->getBody()->getContents();
-        print($content);
         $payload = json_decode($content, true);
-        print "payload\n";
-        print_r($payload);
         return $this->response = $this->createResponse(@$payload['create_request']);
-
-
-        /*$url = $this->getEndpoint().'/transaction/create/';
-        $httpRequest = $this->httpClient->request(
-            'POST',
-            $url,
-            [
-                'Content-Type' => 'application/json'
-            ],
-            $this->toJSON($data)
-        );
-
-        $payload =  json_decode($httpRequest->getBody()->getContents(), true);
-
-
-        return $this->response = new Response($this, $payload);*/
-
+        //return $this->response = new Response($this, $payload);
     }
 
     public function setApiKey($value)

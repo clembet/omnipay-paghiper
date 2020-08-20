@@ -12,36 +12,6 @@ class Gateway extends AbstractGateway
         return 'PagHiper';
     }
 
-    public function getClientId()
-    {
-        return $this->getParameter('client_id');
-    }
-
-    public function setClientId($value)
-    {
-        return $this->setParameter('client_id', $value);
-    }
-
-    public function getClientSecret()
-    {
-        return $this->getParameter('client_secret');
-    }
-
-    public function setClientSecret($value)
-    {
-        return $this->setParameter('client_secret', $value);
-    }
-
-    public function getGrantType()
-    {
-        return $this->getParameter('grant_type');
-    }
-
-    public function setGrantType($value)
-    {
-        return $this->setParameter('grant_type', $value);
-    }
-
     public function setApiKey($value)
     {
         return $this->setParameter('apiKey', $value);
@@ -76,20 +46,6 @@ class Gateway extends AbstractGateway
     {
         return $this->createRequest('\Omnipay\PagHiper\Message\PurchaseRequest', $parameters);
     }
-    public function requestToken(array $parameters = array())
-    {
-        return $this->createRequest('\Omnipay\PagHiper\Message\TokenRequest', $parameters);
-    }
-
-    /**
-     * @param  array  $parameters
-     * @return \Omnipay\PagHiper\Message\CompletePurchaseRequest
-     */
-    public function completePurchase(array $parameters = array())
-    {
-        return $this->createRequest('\Omnipay\PagHiper\Message\CompletePurchaseRequest', $parameters);
-    }
-
 }
 
 ?>

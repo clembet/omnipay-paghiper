@@ -3,7 +3,7 @@
     "description": "PagHiper gateway for OmniPay",
     "keywords": [
         "paghiper",
-	"omnipay"
+	    "omnipay"
     ],
     "license": "MIT",
     "authors": [
@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=7.2",
-	"omnipay/common": "^3.0"
+	    "omnipay/common": "^3.0"
     },
     "require-dev": {
         "omnipay/tests": "^3.0"

@@ -6,12 +6,9 @@ use Omnipay\Tests\GatewayTestCase;
 
 class GatewayTest extends GatewayTestCase
 {
-    public function setUp()
+    public function setUp()//TODO: refazer
     {
         $this->gateway = new Gateway($this->getHttpClient(), $this->getHttpRequest());
-        $this->gateway->setClientId("1409715019698491");
-        $this->gateway->setClientSecret("PNGxKb6I7mqs1npFwCf4nDqRfSMqAOpE");
-        $this->gateway->setExternalReference(178);
         $item = new Item();
         $item->setName("PurchaseTest");
         $item->setCategoryId("tickets");
@@ -21,14 +18,8 @@ class GatewayTest extends GatewayTestCase
         $this->items = array("items" => [$item]);
     }
 
-    public function testPurchase()
+    public function testPurchase()//TODO: refazer
     {
-        $responseToken = $this->gateway->requestToken($this->items)->send();
-        $dataToken = $responseToken->getData();
-        $this->gateway->setAccessToken($dataToken['access_token']);
-        $this->assertInstanceOf('\Omnipay\PagHiper\Message\TokenResponse', $responseToken);
-        $this->assertTrue($this->gateway->getAccessToken() != null);
-
         $response = $this->gateway->purchase($this->items)->send();
         $data = $response->getData();
         $this->assertInstanceOf('\Omnipay\PagHiper\Message\PurchaseResponse', $response);
