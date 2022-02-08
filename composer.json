@@ -14,10 +14,10 @@
     ],
     "require": {
         "php": ">=7.2",
-	    "omnipay/common": "^3.0"
+	    "clembet/omnipay-common": "^3.0"
     },
     "require-dev": {
-        "omnipay/tests": "^3.0"
+        "clembet/omnipay-tests": "^3.0"
     },
     "autoload": {
         "psr-4": {

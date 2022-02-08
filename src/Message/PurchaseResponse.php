@@ -5,6 +5,8 @@ use Omnipay\Common\Message\RedirectResponseInterface;
 
 class PurchaseResponse extends AbstractResponse implements RedirectResponseInterface
 {
+    protected $transaction_id = NULL;
+
     public function isSuccessful()
     {
         $data = $this->getData();
@@ -54,9 +56,14 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
         $boleto['boleto_expiration_date'] = @$data['due_date'];
         $boleto['boleto_valor'] = (@$data['value_cents']*1.0)/100.0;
         $boleto['boleto_transaction_id'] = @$data['transaction_id'];
-        $this->setTransactionReference(@$data['transaction_id']);
+        @$this->setTransactionReference(@$data['transaction_id']);
 
         return $boleto;
+    }
+
+    public function setTransactionReference($transaction_id)
+    {
+        $this->transaction_id = $transaction_id;
     }
 }
 
