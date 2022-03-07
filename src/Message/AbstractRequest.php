@@ -24,15 +24,14 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 
         $url = $this->getEndpoint();
         $method = $this->requestMethod;
-        $data=@$data['external_reference'];
-
+        
         $headers = [
             'Accept' => 'application/json',
             'Accept-Charset' => 'UTF-8',
             'Accept-Encoding' => 'application/json',
             'Content-Type' => 'application/json'
         ];
-
+        
         $httpRequest = $this->httpClient->request($method, $url, $headers, $this->toJSON($data));
 
         $content = $httpRequest->getBody()->getContents();

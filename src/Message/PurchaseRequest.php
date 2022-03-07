@@ -44,10 +44,10 @@ class PurchaseRequest extends AbstractRequest
             $itemsArr[] = array('description'=>$item->getName(),
                 'quantity'=>$item->getQuantity(),
                 'price_cents'=>(int)round(($item->getPrice()*100.0), 0),
-                'item_id' => '1');//sku
+                'item_id' => '1');//utilizar o código 1, caso não queira usar o sku do produto
         }
 
-        $external_reference = array(
+        $data = [
             'apiKey' => $this->getApiKey(),
             'token' => $this->getApiToken(),
             'order_id' => $this->getOrderId(), // código interno do lojista para identificar a transacao.
@@ -55,40 +55,33 @@ class PurchaseRequest extends AbstractRequest
             'payer_name' => $customer['payer_name'], // nome completo ou razao social
             'payer_cpf_cnpj' => $customer['payer_cpf_cnpj'], // cpf ou cnpj
             'payer_phone' => $customer['payer_phone'], // fixou ou móvel
-            'payer_street' => $customer['payer_street'],
-            'payer_number' => $customer['payer_number'],
-            'payer_complement' => $customer['payer_complement'],
-            'payer_district' => $customer['payer_district'],
-            'payer_city' => $customer['payer_city'],
-            'payer_state' => $customer['payer_state'], // apenas sigla do estado
-            'payer_zip_code' => $customer['payer_zip_code'],
-            'notification_url' => $this->getNotifyUrl(),
-            'discount_cents' => '0', // em centavos
             'shipping_price_cents' => $this->getShippingPrice(), // em centavos
             'shipping_methods' => 'Envio Personalizado',
             'fixed_description' => false,
-            'type_bank_slip' => 'boletoA4', // formato do boleto
             'days_due_date' => $this->getDueDays(), // dias para vencimento da  cobrança
-            'open_after_day_due'=>'0',
+            'discount_cents' => '0', // em centavos
+            'notification_url' => $this->getNotifyUrl(),
             'items' => $itemsArr,
-        );
-
-        $purchaseObject = [
-            'items'              => $items,
-            'external_reference' => $external_reference,
-            'auto_return'        => 'approved',
-            'back_urls'          => [
-                'success' => $this->getReturnUrl()
-            ],
-            //TODO add option for that
-            'payment_methods'    => [
-                'excluded_payment_types' => [
-                    ["id" => "ticket"],
-                    ["id" => "atm"]
-                ]
-            ]
         ];
-        return $purchaseObject;
+
+        if(strcmp("boleto", strtolower($this->getPaymentType()))==0)
+        {
+            $data_complemento = [
+                'payer_street' => $customer['payer_street'],
+                'payer_number' => $customer['payer_number'],
+                'payer_complement' => $customer['payer_complement'],
+                'payer_district' => $customer['payer_district'],
+                'payer_city' => $customer['payer_city'],
+                'payer_state' => $customer['payer_state'], // apenas sigla do estado
+                'payer_zip_code' => $customer['payer_zip_code'],
+                'type_bank_slip' => 'boletoA4', // formato do boleto
+                'open_after_day_due' => '0',
+            ];
+
+            $data = array_merge($data, $data_complemento);
+        }
+
+        return $data;
 
     }
 }

@@ -1,56 +1,13 @@
 <?php namespace Omnipay\PagHiper\Message;
 
 /*
-https://docs.google.com/document/d/1XUJRHY_0nd45CzFK5EmjDK92qgaQJGMxT0rjZriTk-g/edit#
+Fluxo 1) Exemplo de Post Simples enviado pela PAGHIPER (HTTP Methods: POST)
 
-POST de notificação (Webhook)
-
-Opcionalmente, você pode configurar o Asaas para que seja enviado um POST para a sua aplicação sempre que ocorrerem alterações em uma cobrança. Os eventos que geram notificações deste tipo são: criação, confirmação de pagamento, vencimento, exclusão e alteração de dados da cobrança.
-Para habilitar estas notificações, acesse a área de Configurações do Asaas, Aba Integração, e informe a URL da sua aplicação que deve receber o POST.
-
-Para que o Asaas considere o POST como enviado, o status HTTP da resposta deve ser 200, além de conter o texto “SUCCESS”.
-
-
-O Asaas fará um POST para a sua aplicação, contendo um único atributo: “data”. Este atributo contém a String que é a representação de um objeto JSON, contendo o evento e todos os dados atualizados da cobrança que o originou. Verifique a tabela de eventos para saber o que cada um deles representa.
-
-Segue exemplo do objeto enviado:
-{
-    "event": "PAYMENT_RECEIVED",
-    "payment": {
-        "object": "payment",
-        "id": "pay_614896582179",
-        "customer": "cus_k9c5dkgf82j9",
-        "value": 500.00,
-        "netValue": 495.00,
-        "originalValue": null,
-        "nossoNumero": "80516081",
-        "description": "Pedido nr. 10598",
-        "billingType": "BOLETO",
-        "status": "RECEIVED",
-        "dueDate": "07/05/2016",
-        "paymentDate": "07/05/2016",
-        "invoiceUrl": "https://www.asaas.com/i/614896582179",
-        "boletoUrl": "https://www.asaas.com/b/pdf/614896582179",
-        "invoiceNumber": "00932305",
-        "externalReference": null,
-        "deleted": false
-    }
-}
-
-
-Eventos disponíveis
-Nome
-Evento
-PAYMENT_CREATED  Geração de nova cobrança
-PAYMENT_UPDATED Alteração no vencimento ou valor de cobrança existente.
-PAYMENT_CONFIRMED Cobrança autorizada pela adquirente (somente cartão de crédito)
-PAYMENT_RECEIVED Cobrança recebida.
-PAYMENT_OVERDUE Cobrança vencida
-PAYMENT_DELETED Cobrança removida
-PAYMENT_REFUNDED Cobrança estornada (somente cartão de crédito)
-
-
-
+apiKey=apk_12345678-OiCWOKczTjutZazRSfTlVBDpHFxpkdzz&
+transaction_id=BPV661O7AVLORCN5&
+notification_id= W6QM6MORZW4KUENC0NU6ERN0AULFUIUROKEU72L6ZQQT4E6521CGT0G3V2JQKDI9&
+notification_date=2017-07-25 11:21:19
+source_api=https://api.paghiper.com
  */
 
 class NotificationRequest extends AbstractRequest
@@ -70,41 +27,65 @@ class NotificationRequest extends AbstractRequest
         return parent::getData();
     }
 
-    public function getNotificationType()
+    public function getNotificationID()
     {
-        return $this->getParameter('notificationType');
+        return $this->getParameter('notification_id');
     }
 
-    public function setNotificationType($value)
+    public function setNotificationID($value)
     {
-        return $this->setParameter('notificationType', $value);
+        return $this->setParameter('notification_id', $value);
     }
 
-    public function setNotificationCode($value)
+    public function setNotificationDate($value)
     {
-        return $this->setParameter('notificationCode', $value);
+        return $this->setParameter('notification_date', $value);
     }
 
-    public function getNotificationCode()
+    public function getNotificationDate()
     {
-        return $this->getParameter('notificationCode');
+        return $this->getParameter('notification_date');
+    }
+
+    public function getSourceApi()
+    {
+        return $this->getParameter('source_api');
+    }
+
+    public function setSourceApi($value)
+    {
+        return $this->setParameter('source_api', $value);
     }
 
     public function sendData($data)
     {
-        $this->validate('notificationCode');
+        $this->validate('transactionId', 'notification_id');
 
-        $url = sprintf(
-            '%s/%s?%s',
-            $this->getEndpoint(),
-            $this->getNotificationCode(),
-            http_build_query($data, '', '&')
-        );
+        if(strpos($this->getSourceApi(), "api.")>0)
+            $this->setPaymentType("Boleto");
+        if(strpos($this->getSourceApi(), "pix.")>0)
+            $this->setPaymentType("Pix");
 
-        print $url."\n\n";
-        $httpResponse = $this->httpClient->request($this->getMethod(), $url, ['Content-Type' => 'application/x-www-form-urlencoded']);
-        $xml          = @simplexml_load_string($httpResponse->getBody()->getContents(), 'SimpleXMLElement', LIBXML_NOCDATA);
+        $url = $this->getEndpoint();
+        $method = $this->requestMethod;
 
-        return $this->createResponse(@$this->xml2array($xml));
+        $headers = [
+            'Accept' => 'application/json',
+            'Accept-Charset' => 'UTF-8',
+            'Accept-Encoding' => 'application/json',
+            'Content-Type' => 'application/json'
+        ];
+
+        $data = [
+            'apiKey' => $this->getApiKey(),
+            'token' => $this->getApiToken(),
+            'transaction_id' => $this->getTransactionID(),
+            "notification_id" => $this->getNotificationID(),
+        ];
+
+        $httpResponse = $this->httpClient->request($method, $url, $headers, $this->toJSON($data));
+        $json = $httpResponse->getBody()->getContents();
+        $json = @json_decode($json, true);
+        return $this->createResponse($json["status_request"]);
     }
 }

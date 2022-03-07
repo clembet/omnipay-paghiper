@@ -50,9 +50,7 @@ class VoidRequest extends AbstractRequest
 
         $httpResponse = $this->httpClient->request($method, $url, $headers, $this->toJSON($data));
         $json = $httpResponse->getBody()->getContents();
-        print($json);
         $json = @json_decode($json, true);
-        print_r($json);
         return $this->createResponse($json["cancellation_request"]);
     }
 }

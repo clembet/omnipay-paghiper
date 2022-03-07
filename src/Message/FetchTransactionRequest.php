@@ -32,7 +32,6 @@ class FetchTransactionRequest extends AbstractRequest
             'transaction_id' => $this->getTransactionID()
         ];
 
-        print_r([$method, $url, $headers, $data]);
         $httpResponse = $this->httpClient->request($method, $url, $headers, $this->toJSON($data));
         $json = $httpResponse->getBody()->getContents();
         $json = @json_decode($json, true);
