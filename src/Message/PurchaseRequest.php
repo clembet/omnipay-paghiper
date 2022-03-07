@@ -4,6 +4,9 @@ namespace Omnipay\PagHiper\Message;
 
 class PurchaseRequest extends AbstractRequest
 {
+    protected $resourceBoleto = 'transaction/create/';
+    protected $resourcePix = 'invoice/create/';
+    protected $requestMethod = 'POST';
 
     public function getItemData()
     {
@@ -30,19 +33,46 @@ class PurchaseRequest extends AbstractRequest
 
     public function getData()
     {
-        $data = array(
-            "items" => array(
-                array(
-                    'title'       => 'PurchaseTest',
-                    'quantity'    => 1,
-                    'category_id' => 'tickets',
-                    'currency_id' => 'BRL',
-                    'unit_price'  => 10.0
-                )
-            ));
-
+        $this->validate("items", "customer", "order_id", "amount", "due_days", "shipping_price", "currency");
         $items = $this->getItemData();
-        $external_reference = parent::getData();
+        $customer = $this->getCustomer();
+        $items_data = $this->getItems();
+
+        $itemsArr = array();
+        if($items_data && (count($items_data) > 0))foreach($items_data as $item)
+        {
+            $itemsArr[] = array('description'=>$item->getName(),
+                'quantity'=>$item->getQuantity(),
+                'price_cents'=>(int)round(($item->getPrice()*100.0), 0),
+                'item_id' => '1');//sku
+        }
+
+        $external_reference = array(
+            'apiKey' => $this->getApiKey(),
+            'token' => $this->getApiToken(),
+            'order_id' => $this->getOrderId(), // código interno do lojista para identificar a transacao.
+            'payer_email' => $customer['payer_email'],
+            'payer_name' => $customer['payer_name'], // nome completo ou razao social
+            'payer_cpf_cnpj' => $customer['payer_cpf_cnpj'], // cpf ou cnpj
+            'payer_phone' => $customer['payer_phone'], // fixou ou móvel
+            'payer_street' => $customer['payer_street'],
+            'payer_number' => $customer['payer_number'],
+            'payer_complement' => $customer['payer_complement'],
+            'payer_district' => $customer['payer_district'],
+            'payer_city' => $customer['payer_city'],
+            'payer_state' => $customer['payer_state'], // apenas sigla do estado
+            'payer_zip_code' => $customer['payer_zip_code'],
+            'notification_url' => $this->getNotifyUrl(),
+            'discount_cents' => '0', // em centavos
+            'shipping_price_cents' => $this->getShippingPrice(), // em centavos
+            'shipping_methods' => 'Envio Personalizado',
+            'fixed_description' => false,
+            'type_bank_slip' => 'boletoA4', // formato do boleto
+            'days_due_date' => $this->getDueDays(), // dias para vencimento da  cobrança
+            'open_after_day_due'=>'0',
+            'items' => $itemsArr,
+        );
+
         $purchaseObject = [
             'items'              => $items,
             'external_reference' => $external_reference,
@@ -61,17 +91,6 @@ class PurchaseRequest extends AbstractRequest
         return $purchaseObject;
 
     }
-
-    protected function createResponse($data)
-    {
-        return $this->response = new PurchaseResponse($this, $data);
-    }
-
-    protected function getEndpoint()
-    {
-        return $this->getTestMode() ? ($this->testEndpoint . '/transaction/create/') : ($this->liveEndpoint . '/transaction/create/');
-    }
-
 }
 
 ?>

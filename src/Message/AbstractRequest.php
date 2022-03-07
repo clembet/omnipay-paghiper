@@ -4,72 +4,40 @@ namespace Omnipay\PagHiper\Message;
 
 abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 {
-    protected $liveEndpoint = 'https://api.paghiper.com';
-    protected $testEndpoint = 'https://api.paghiper.com';
+    protected $liveEndpointBoleto = 'https://api.paghiper.com';
+    protected $testEndpointBoleto = 'https://api.paghiper.com';
+    protected $liveEndpointPix = 'https://pix.paghiper.com';
+    protected $testEndpointPix = 'https://pix.paghiper.com';
+    protected $resourceBoleto = 'transaction/create/';
+    protected $resourcePix = 'invoice/create/';
+    protected $requestMethod = 'POST';
 
     public function getData()
     {
-        $customer = $this->getCustomer();
-        $items_data = $this->getItems();
-
-        $items = array();
-        if($items_data && (count($items_data) > 0))foreach($items_data as $item)
-        {
-            $items[] = array('description'=>$item->getName(),
-                'quantity'=>$item->getQuantity(),
-                'price_cents'=>(int)round(($item->getPrice()*100.0), 0),
-                'item_id' => '1');//sku
-        }
-
-        $data = array(
-            'apiKey' => $this->getApiKey(),
-            'token' => $this->getApiToken(),
-            'order_id' => $this->getOrderId(), // código interno do lojista para identificar a transacao.
-            'payer_email' => $customer['payer_email'],
-            'payer_name' => $customer['payer_name'], // nome completo ou razao social
-            'payer_cpf_cnpj' => $customer['payer_cpf_cnpj'], // cpf ou cnpj
-            'payer_phone' => $customer['payer_phone'], // fixou ou móvel
-            'payer_street' => $customer['payer_street'],
-            'payer_number' => $customer['payer_number'],
-            'payer_complement' => $customer['payer_complement'],
-            'payer_district' => $customer['payer_district'],
-            'payer_city' => $customer['payer_city'],
-            'payer_state' => $customer['payer_state'], // apenas sigla do estado
-            'payer_zip_code' => $customer['payer_zip_code'],
-            'notification_url' => $this->getNotifyUrl(),
-            'discount_cents' => '0', // em centavos
-            'shipping_price_cents' => $this->getShippingPrice(), // em centavos
-            'shipping_methods' => 'Envio Personalizado',
-            'fixed_description' => false,
-            'type_bank_slip' => 'boletoA4', // formato do boleto
-            'days_due_date' => $this->getDueDays(), // dias para vencimento do boleto
-            'open_after_day_due'=>'0',
-            'items' => $items,
-        );
-
-        return $data;
+        $this->validate("paymentType");
+        return [];
     }
 
     public function sendData($data)
     {
+        $this->validate("paymentType");
+
         $url = $this->getEndpoint();
+        $method = $this->requestMethod;
         $data=@$data['external_reference'];
-        $httpRequest = $this->httpClient->request(
-            'POST',
-            $url,
-            array(
-                'Accept' => 'application/json',
-                'Accept-Charset' => 'UTF-8',
-                'Accept-Encoding' => 'application/json',
-                'Content-Type' => 'application/json'
-            ),
-            $this->toJSON($data)
-        );
+
+        $headers = [
+            'Accept' => 'application/json',
+            'Accept-Charset' => 'UTF-8',
+            'Accept-Encoding' => 'application/json',
+            'Content-Type' => 'application/json'
+        ];
+
+        $httpRequest = $this->httpClient->request($method, $url, $headers, $this->toJSON($data));
 
         $content = $httpRequest->getBody()->getContents();
         $payload = json_decode($content, true);
-        return $this->response = $this->createResponse(@$payload['create_request']);
-        //return $this->response = new Response($this, $payload);
+        return $this->createResponse(@$payload[(strcmp("boleto", strtolower($this->getPaymentType()))==0)?'create_request':'pix_create_request']);
     }
 
     public function setApiKey($value)
@@ -131,6 +99,26 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
         return (int)round((@($this->getParameter('shipping_price')*100.0)), 0);
     }
 
+    public function getTransactionID()
+    {
+        return $this->getParameter('transactionId');
+    }
+
+    public function setTransactionID($value)
+    {
+        return $this->setParameter('transactionId', $value);
+    }
+
+    public function getPaymentType()
+    {
+        return $this->getParameter('paymentType');
+    }
+
+    public function setPaymentType($value)
+    {
+        $this->setParameter('paymentType', $value);
+    }
+
     /**
      * Get Customer Data
      *
@@ -154,7 +142,25 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 
     protected function getEndpoint()
     {
-        return $this->getTestMode() ? $this->testEndpoint : $this->liveEndpoint;
+        switch(strtolower($this->getPaymentType()))
+        {
+            case "boleto":
+                return $this->getTestMode() ? ($this->testEndpointBoleto . '/'.$this->resourceBoleto) : ($this->liveEndpointBoleto . '/'.$this->resourceBoleto);
+            break;
+
+            case "pix":
+                return $this->getTestMode() ? ($this->testEndpointPix . '/'.$this->resourcePix) : ($this->liveEndpointPix . '/'.$this->resourcePix);
+                break;
+
+            default:
+                return $this->getTestMode() ? ($this->testEndpointBoleto . '/'.$this->resourceBoleto) : ($this->liveEndpointBoleto . '/'.$this->resourceBoleto);
+        }
+
+    }
+
+    protected function createResponse($data)
+    {
+        return $this->response = new Response($this, $data);
     }
 
     public function toJSON($data, $options = 0)
