@@ -51,10 +51,10 @@ class PurchaseRequest extends AbstractRequest
             'apiKey' => $this->getApiKey(),
             'token' => $this->getApiToken(),
             'order_id' => $this->getOrderId(), // código interno do lojista para identificar a transacao.
-            'payer_email' => $customer['payer_email'],
-            'payer_name' => $customer['payer_name'], // nome completo ou razao social
-            'payer_cpf_cnpj' => $customer['payer_cpf_cnpj'], // cpf ou cnpj
-            'payer_phone' => $customer['payer_phone'], // fixou ou móvel
+            'payer_email' => $customer->getEmail(),
+            'payer_name' => $customer->getName(), // nome completo ou razao social
+            'payer_cpf_cnpj' => $customer->getDocumentNumber(), // cpf ou cnpj
+            'payer_phone' => $customer->getPhone(), // fixou ou móvel
             'shipping_price_cents' => $this->getShippingPrice(), // em centavos
             'shipping_methods' => 'Envio Personalizado',
             'fixed_description' => false,
@@ -67,13 +67,13 @@ class PurchaseRequest extends AbstractRequest
         if(strcmp("boleto", strtolower($this->getPaymentType()))==0)
         {
             $data_complemento = [
-                'payer_street' => $customer['payer_street'],
-                'payer_number' => $customer['payer_number'],
-                'payer_complement' => $customer['payer_complement'],
-                'payer_district' => $customer['payer_district'],
-                'payer_city' => $customer['payer_city'],
-                'payer_state' => $customer['payer_state'], // apenas sigla do estado
-                'payer_zip_code' => $customer['payer_zip_code'],
+                'payer_street' => $customer->getBillingAddress1(),
+                'payer_number' => $customer->getBillingNumber(),
+                'payer_complement' => $customer->getBillingAddress2(),
+                'payer_district' => $customer->getBillingDistrict(),
+                'payer_city' => $customer->getBillingCity(),
+                'payer_state' => $customer->getBillingState(), // apenas sigla do estado
+                'payer_zip_code' => $customer->getBillingPostcode(),
                 'type_bank_slip' => 'boletoA4', // formato do boleto
                 'open_after_day_due' => '0',
             ];

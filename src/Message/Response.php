@@ -17,7 +17,7 @@ class Response extends AbstractResponse
      *
      * @return string|null
      */
-    public function getTransactionReference()
+    public function getTransactionID()
     {
         if(isset($this->data['transaction_id']))
             return @$this->data['transaction_id'];
