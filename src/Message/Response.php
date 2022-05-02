@@ -95,7 +95,7 @@ class Response extends AbstractResponse
     {
         $data = $this->getData();
         $pix = array();
-        $pix['pix_qrcodebase64image'] = @$data['pix_code']['qrcode_base64'];
+        $pix['pix_qrcodebase64image'] = "data:image/png;base64,".@$data['pix_code']['qrcode_base64'];
         $pix['pix_qrcodestring'] = @$data['pix_code']['emv'];
         $pix['pix_valor'] = (@$data['value_cents']*1.0)/100.0;
         $pix['pix_transaction_id'] = @$data['transaction_id'];
