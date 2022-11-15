@@ -55,7 +55,7 @@ class PurchaseRequest extends AbstractRequest
             'payer_name' => $customer->getName(), // nome completo ou razao social
             'payer_cpf_cnpj' => $customer->getDocumentNumber(), // cpf ou cnpj
             'payer_phone' => $customer->getPhone(), // fixou ou móvel
-            'shipping_price_cents' => $this->getShippingPrice(), // em centavos
+            'shipping_price_cents' => (int)($this->getShippingPrice()*100.0), // em centavos
             'shipping_methods' => 'Envio Personalizado',
             'fixed_description' => false,
             'days_due_date' => $this->getDueDays(), // dias para vencimento da  cobrança

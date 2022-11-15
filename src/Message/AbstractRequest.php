@@ -95,7 +95,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 
     public function getShippingPrice()
     {
-        return (int)round((@($this->getParameter('shipping_price')*100.0)), 0);
+        return $this->getParameter('shipping_price');
     }
 
     public function getTransactionID()
